@@ -3,3 +3,4 @@ djangorestframework
 django-channels
 requests
 spotipy
+python-decouple
