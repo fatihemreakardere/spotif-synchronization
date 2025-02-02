@@ -2,8 +2,14 @@ import requests
 import time
 from django.conf import settings
 from urllib.parse import urlencode
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.http import HttpResponse, JsonResponse
+
+def index(request):
+    token = request.session.get('access_token')
+    if not token:
+        return redirect('spotify_login')
+    return render(request, 'music/client.html', {'token': token})
 
 def spotify_login(request):
     scope = "user-read-playback-state user-modify-playback-state streaming"
@@ -43,3 +49,16 @@ def spotify_callback(request):
     request.session['expires_at'] = int(time.time()) + token_info.get('expires_in')
     
     return JsonResponse(token_info)
+
+def spotify_realtime_status(request):
+    access_token = request.session.get('access_token')
+    if not access_token:
+        return HttpResponse("Unauthorized", status=401)
+    headers = {
+        "Authorization": "Bearer " + access_token
+    }
+    player_url = "https://api.spotify.com/v1/me/player"
+    response = requests.get(player_url, headers=headers)
+    if response.status_code != 200:
+        return HttpResponse("Failed to get player status", status=response.status_code)
+    return JsonResponse(response.json())
