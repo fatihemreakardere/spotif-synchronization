@@ -15,6 +15,8 @@ const formatTime = (ms) => {
   return minutes + ":" + (seconds < 10 ? "0" + seconds : seconds);
 };
 
+let isPlaying = false; // global flag for current playback status
+
 socket.onopen = function () {
   console.log("WebSocket connection established");
 };
@@ -48,6 +50,14 @@ socket.onmessage = function (event) {
       data.duration
     );
   }
+
+  // Update playback state and adjust play button icon accordingly
+  isPlaying = data.is_playing;
+  const playBtn = document.getElementById("play-btn");
+  if (playBtn) {
+    playBtn.innerHTML = isPlaying ? "⏸" : "▶";
+    playBtn.title = isPlaying ? "Pause" : "Play";
+  }
 };
 
 socket.onerror = function (error) {
@@ -57,3 +67,31 @@ socket.onerror = function (error) {
 socket.onclose = function () {
   console.log("WebSocket connection closed");
 };
+
+// Add event listeners for control buttons
+document.addEventListener("DOMContentLoaded", function() {
+  const previousBtn = document.getElementById("previous-btn");
+  const playBtn = document.getElementById("play-btn");
+  const nextBtn = document.getElementById("next-btn");
+
+  if (previousBtn) {
+    previousBtn.addEventListener("click", function() {
+      socket.send(JSON.stringify({ command: "previous" }));
+    });
+  }
+  if (playBtn) {
+    playBtn.addEventListener("click", function() {
+      // Toggle based on current state:
+      if (isPlaying) {
+        socket.send(JSON.stringify({ command: "pause" }));
+      } else {
+        socket.send(JSON.stringify({ command: "play" }));
+      }
+    });
+  }
+  if (nextBtn) {
+    nextBtn.addEventListener("click", function() {
+      socket.send(JSON.stringify({ command: "next" }));
+    });
+  }
+});

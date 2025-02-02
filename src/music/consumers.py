@@ -29,7 +29,7 @@ class SpotifyPlayerConsumer(AsyncWebsocketConsumer):
             status = await self.get_player_status()
             if status:
                 await self.send(json.dumps(status))
-            await asyncio.sleep(0.00001)
+            await asyncio.sleep(0)
 
     async def get_player_status(self):
         headers = {"Authorization": "Bearer " + self.access_token}
@@ -57,3 +57,39 @@ class SpotifyPlayerConsumer(AsyncWebsocketConsumer):
                 "album_art": album_art,
                 "curent_time_min_sec": f"{data.get('progress_ms') // 60000}:{str(data.get('progress_ms') % 60000 // 1000).zfill(2)}",
             }
+
+    async def receive(self, text_data=None):
+        # Handle control commands from client
+        data = json.loads(text_data)
+        command = data.get("command")
+        if command:
+            await self.control_playback(command)
+        # Optionally, pass through other messages if needed
+        # ...existing code...
+
+    async def control_playback(self, command):
+        # Map commands to their respective Spotify API endpoints and HTTP method
+        url_map = {
+            "play": {"url": "https://api.spotify.com/v1/me/player/play", "method": "PUT"},
+            "pause": {"url": "https://api.spotify.com/v1/me/player/pause", "method": "PUT"},
+            "next": {"url": "https://api.spotify.com/v1/me/player/next", "method": "POST"},
+            "previous": {"url": "https://api.spotify.com/v1/me/player/previous", "method": "POST"},
+        }
+        entry = url_map.get(command)
+        if not entry:
+            await self.send(json.dumps({"status": "error", "message": "Unknown command"}))
+            return
+
+        headers = {
+            "Authorization": "Bearer " + self.access_token,
+            "Content-Type": "application/json"
+        }
+        async with httpx.AsyncClient() as client:
+            if entry["method"] == "PUT":
+                response = await client.put(entry["url"], headers=headers)
+            else:
+                response = await client.post(entry["url"], headers=headers)
+        if response.status_code in (200, 204):
+            await self.send(json.dumps({"status": "ok", "action": command}))
+        else:
+            await self.send(json.dumps({"status": "error", "action": command, "code": response.status_code}))

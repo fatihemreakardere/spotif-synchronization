@@ -59,3 +59,25 @@ body {
   font-size: 0.9em;
   margin-top: 5px;
 }
+.controls {
+  margin-top: 20px;
+  text-align: center;
+}
+.controls button {
+  width: 60px;
+  height: 60px;
+  background: #1db954;
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 2em;
+  margin: 0 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+.controls button:hover {
+  background: #17a84b;
+}
