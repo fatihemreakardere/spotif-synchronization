@@ -4,3 +4,4 @@ django-channels
 requests
 spotipy
 python-decouple
+channels
