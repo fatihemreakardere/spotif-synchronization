@@ -1,43 +1,42 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Spotify Player Status</title>
+    <title>Spotify-Like Player</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'music/client.css' %}"
+    />
   </head>
   <body>
-    <h1>Spotify Player Status</h1>
-    <pre id="status"></pre>
+    <!-- Set global token variable -->
     <script>
-      // Token provided via view context
-      const token = "{{ token }}";
-      // Dynamically determine WebSocket protocol and host
-      const ws_scheme = window.location.protocol === "https:" ? "wss" : "ws";
-      const socketUrl =
-        ws_scheme + "://" + window.location.host + "/ws/sync/?token=" + token;
-      console.log("WebSocket URL:", socketUrl);
-      const socket = new WebSocket(socketUrl);
-
-      socket.onopen = function () {
-        console.log("WebSocket connection established");
-      };
-
-      socket.onmessage = function (event) {
-        const data = JSON.parse(event.data);
-        console.log("Realtime Player Status:", data);
-        document.getElementById("status").textContent = JSON.stringify(
-          data,
-          null,
-          2
-        );
-      };
-
-      socket.onerror = function (error) {
-        console.error("WebSocket error:", error);
-      };
-
-      socket.onclose = function () {
-        console.log("WebSocket connection closed");
-      };
+      window.TOKEN = "{{ token }}";
     </script>
+    <div class="player">
+      <h1>Now Playing</h1>
+      <div class="track-info">
+        <div class="album-art" id="album-art">
+          <!-- Album art image; update src dynamically if available -->
+          <img id="album-image" src="" alt="Album Art" style="display: none" />
+        </div>
+        <div class="details">
+          <p class="track-title" id="track-title">No track playing</p>
+          <p class="artist" id="artist">Unknown Artist</p>
+        </div>
+      </div>
+      <div class="progress-container">
+        <div class="progress-bar">
+          <div class="progress" id="progress"></div>
+        </div>
+        <div class="time">
+          <span id="current-time">0:00</span>
+          <span id="total-time">0:00</span>
+        </div>
+      </div>
+    </div>
+    <script src="{% static 'music/client.js' %}"></script>
   </body>
 </html>

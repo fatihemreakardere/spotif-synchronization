@@ -39,10 +39,21 @@ class SpotifyPlayerConsumer(AsyncWebsocketConsumer):
             if response.status_code != 200:
                 return None
             data = response.json()
+            # Extract artist names from list of artist objects:
+            artists = data.get("item", {}).get("artists", [])
+            artist_names = ", ".join(artist.get("name") for artist in artists) if artists else "Unknown Artist"
+            # Get album image from album object:
+            album_art = ""
+            album_info = data.get("item", {}).get("album", {})
+            images = album_info.get("images", [])
+            if images:
+                album_art = images[0].get("url", "")
             return {
                 "current_time": data.get("progress_ms"),
                 "duration": data.get("item", {}).get("duration_ms"),
                 "is_playing": data.get("is_playing"),
                 "currently_playing": data.get("item", {}).get("name"),
+                "artist": artist_names,
+                "album_art": album_art,
                 "curent_time_min_sec": f"{data.get('progress_ms') // 60000}:{str(data.get('progress_ms') % 60000 // 1000).zfill(2)}",
             }
