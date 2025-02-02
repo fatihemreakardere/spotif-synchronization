@@ -9,7 +9,7 @@
     <pre id="status"></pre>
     <script>
       // Token provided via view context
-      const token = "{{ token|default:'' }}";
+      const token = "{{ token }}";
       // Dynamically determine WebSocket protocol and host
       const ws_scheme = window.location.protocol === "https:" ? "wss" : "ws";
       const socketUrl =
