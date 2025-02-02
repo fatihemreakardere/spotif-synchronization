@@ -48,7 +48,7 @@ def spotify_callback(request):
     request.session['refresh_token'] = token_info.get('refresh_token')
     request.session['expires_at'] = int(time.time()) + token_info.get('expires_in')
     
-    return JsonResponse(token_info)
+    return redirect('index')
 
 def spotify_realtime_status(request):
     access_token = request.session.get('access_token')
