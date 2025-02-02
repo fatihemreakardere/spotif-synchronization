@@ -129,4 +129,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SPOTIFY_CLIENT_ID = config('SPOTIFY_CLIENT_ID')
 SPOTIFY_CLIENT_SECRET = config('SPOTIFY_CLIENT_SECRET')
-SPOTIFY_REDIRECT_URI = "http://localhost:8000/callback/"
+SPOTIFY_REDIRECT_URI = "http://localhost:8000/music/callback/"
