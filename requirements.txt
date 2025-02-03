@@ -1,9 +1,9 @@
 django
 djangorestframework
-#django-channels
 requests
 spotipy
 python-decouple
 channels
 httpx
 daphne
+gunicorn
