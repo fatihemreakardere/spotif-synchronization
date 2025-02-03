@@ -27,7 +27,14 @@ SECRET_KEY = config('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '0c32-31-223-89-89.ngrok-free.app',
+    'localhost',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://0c32-31-223-89-89.ngrok-free.app',
+]
 
 
 # Application definition
@@ -142,4 +149,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SPOTIFY_CLIENT_ID = config('SPOTIFY_CLIENT_ID')
 SPOTIFY_CLIENT_SECRET = config('SPOTIFY_CLIENT_SECRET')
-SPOTIFY_REDIRECT_URI = "http://localhost:8000/music/callback/"
+SPOTIFY_REDIRECT_URI = "https://0c32-31-223-89-89.ngrok-free.app/music/callback/"
