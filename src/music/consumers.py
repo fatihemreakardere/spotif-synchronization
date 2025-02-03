@@ -67,20 +67,56 @@ class SpotifyPlayerConsumer(AsyncWebsocketConsumer):
                 "currently_playing": data.get("item", {}).get("name"),
                 "artist": artist_names,
                 "album_art": album_art,
+                # New field – track URI (needed for syncing):
+                "track_uri": data.get("item", {}).get("uri", ""),
                 "curent_time_min_sec": f"{data.get('progress_ms') // 60000}:{str(data.get('progress_ms') % 60000 // 1000).zfill(2)}",
             }
+
 
     async def participant_status(self, event):
         await self.send(text_data=json.dumps(event["status"]))
 
     async def receive(self, text_data=None):
-        # Handle control commands from client
         data = json.loads(text_data)
         command = data.get("command")
-        if command:
+        if command == "sync":
+            # Extract track info from the sync command
+            track_uri = data.get("track_uri")
+            position_ms = data.get("position_ms")
+            if track_uri and position_ms is not None:
+                await self.sync_playback(track_uri, position_ms)
+            else:
+                await self.send(json.dumps({"status": "error", "message": "Missing sync parameters"}))
+            return
+        elif command:
+            # Handle existing commands (play, pause, next, previous)
             await self.control_playback(command)
-        # Optionally, pass through other messages if needed
-        # ...existing code...
+
+    async def sync_playback(self, track_uri, position_ms):
+        """
+        Calls Spotify's API to set playback to a given track at a specified position.
+        """
+        url = "https://api.spotify.com/v1/me/player/play"
+        headers = {
+            "Authorization": "Bearer " + self.access_token,
+            "Content-Type": "application/json"
+        }
+        # The Spotify API allows passing a JSON payload with track URIs and the start position.
+        body = {
+            "uris": [track_uri],
+            "position_ms": position_ms
+        }
+        async with httpx.AsyncClient() as client:
+            response = await client.put(url, headers=headers, json=body)
+        if response.status_code in (200, 204):
+            await self.send(json.dumps({"status": "ok", "action": "sync"}))
+        else:
+            await self.send(json.dumps({
+                "status": "error",
+                "action": "sync",
+                "code": response.status_code,
+                "message": response.text
+            }))
 
     async def control_playback(self, command):
         # Map commands to their respective Spotify API endpoints and HTTP method

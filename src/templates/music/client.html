@@ -42,14 +42,13 @@
           <span id="total-time">0:00</span>
         </div>
       </div>
-      <!-- New Controls Section -->
+      <!-- Player Controls -->
       <div class="controls">
         <button id="previous-btn" title="Previous">&#9664;&#9664;</button>
         <button id="play-btn" title="Play/Pause">&#9654;</button>
         <button id="next-btn" title="Next">&#9654;&#9654;</button>
       </div>
-
-      <!-- Party Controls Section -->
+      <!-- Party Controls -->
       <div class="party-controls">
         <button
           id="start-party-btn"
@@ -80,7 +79,6 @@
             <li>{{ user.username }}</li>
             {% endfor %}
           </ul>
-          <!-- If current user is host, show delete button; otherwise show quit button -->
           {% if user == party.host %}
           <form action="{% url 'delete_party' %}" method="post">
             {% csrf_token %}
@@ -94,10 +92,14 @@
           {% endif %}
         </div>
         {% endif %}
-        <!-- New container for realtime participant statuses -->
-        <div id="participants"></div>
+        <!-- Participants Section with Sync Instruction -->
+        <div class="participants-section">
+          <h2>Participants (click on one to sync):</h2>
+          <div id="participants"></div>
+        </div>
       </div>
     </div>
+    <!-- Link to updated JavaScript file -->
     <script src="{% static 'music/client.js' %}"></script>
   </body>
 </html>
