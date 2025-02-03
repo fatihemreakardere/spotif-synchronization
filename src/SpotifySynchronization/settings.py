@@ -35,7 +35,7 @@ ALLOWED_HOSTS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://spotify-synchronization-d5ce8540b73a.herokuapp.com/',
+    'https://spotify-synchronization-d5ce8540b73a.herokuapp.com',
 ]
 
 
