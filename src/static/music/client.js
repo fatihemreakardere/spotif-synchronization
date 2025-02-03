@@ -12,6 +12,14 @@ const socket = new WebSocket(socketUrl);
 
 let myConnectionId; // To store this client's unique connection id.
 let isPlaying = false; // Global flag for current playback status.
+let currentSyncTarget = null;  // The connection id that we are auto-following.
+let syncThrottle = false;      // Throttle flag to avoid sending sync commands too frequently.
+
+// Variables to store your local playback status.
+let localTrackUri = "";
+let localCurrentTime = 0;
+
+const syncStatusElem = document.getElementById("sync-status");
 
 // Helper function: Convert milliseconds to m:ss format.
 const formatTime = (ms) => {
@@ -36,7 +44,7 @@ socket.onmessage = function (event) {
     return;
   }
 
-  // Update this client's main player UI if the status message is from self.
+  // If the message is from self, update the main player UI and store local status.
   if (data.connection_id === myConnectionId) {
     document.getElementById("track-title").textContent =
       data.currently_playing || "No track playing";
@@ -66,29 +74,36 @@ socket.onmessage = function (event) {
       playBtn.innerHTML = isPlaying ? "⏸" : "▶";
       playBtn.title = isPlaying ? "Pause" : "Play";
     }
+
+    // Update local status variables for your own playback.
+    localTrackUri = data.track_uri || "";
+    localCurrentTime = data.current_time || 0;
   } else {
-    // For status messages from other participants, update the participants list.
+    // For messages from other participants, update or create their display element.
     if (data.connection_id) {
       let participantElem = document.getElementById(data.connection_id);
       if (!participantElem) {
         participantElem = document.createElement("div");
         participantElem.id = data.connection_id;
         participantElem.style.cursor = "pointer";
-        // Add click listener to trigger the sync functionality.
+        // Add click listener to toggle following a participant.
         participantElem.addEventListener("click", function () {
-          const trackUri = this.getAttribute("data-track-uri");
-          const positionMs = parseInt(this.getAttribute("data-position-ms"), 10);
-          if (trackUri && !isNaN(positionMs)) {
-            console.log("Syncing to track:", trackUri, "at", positionMs, "ms");
-            socket.send(
-              JSON.stringify({
-                command: "sync",
-                track_uri: trackUri,
-                position_ms: positionMs,
-              })
-            );
+          if (currentSyncTarget === this.id) {
+            // Unfollow if already following.
+            currentSyncTarget = null;
+            this.style.border = "";
+            syncStatusElem.textContent = "Not following anyone.";
+            console.log("Stopped following", this.id);
           } else {
-            console.error("Missing sync parameters for participant", data.connection_id);
+            // If following another participant, remove border from previous.
+            if (currentSyncTarget) {
+              const prevElem = document.getElementById(currentSyncTarget);
+              if (prevElem) prevElem.style.border = "";
+            }
+            currentSyncTarget = this.id;
+            this.style.border = "2px solid red";
+            syncStatusElem.textContent = "Following participant " + this.id;
+            console.log("Now following", this.id);
           }
         });
         document.getElementById("participants").appendChild(participantElem);
@@ -101,6 +116,39 @@ socket.onmessage = function (event) {
       }`;
       participantElem.setAttribute("data-track-uri", data.track_uri);
       participantElem.setAttribute("data-position-ms", data.current_time);
+
+      // If this participant is the current sync target, check if we need to sync.
+      if (data.connection_id === currentSyncTarget && !syncThrottle) {
+        // Check if the target's track is different or if there is a > 5-second difference.
+        if (
+          (data.track_uri && data.track_uri !== localTrackUri) ||
+          (data.current_time &&
+            Math.abs(data.current_time - localCurrentTime) > 5000)
+        ) {
+          syncThrottle = true;
+          console.log(
+            "Auto-syncing to",
+            data.connection_id,
+            "- target track:",
+            data.track_uri,
+            "target time:",
+            data.current_time,
+            "local time:",
+            localCurrentTime
+          );
+          socket.send(
+            JSON.stringify({
+              command: "sync",
+              track_uri: data.track_uri,
+              position_ms: data.current_time,
+            })
+          );
+          // Throttle auto-sync commands to once per second.
+          setTimeout(() => {
+            syncThrottle = false;
+          }, 1000);
+        }
+      }
     }
   }
 };
