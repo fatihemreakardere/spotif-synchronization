@@ -28,12 +28,12 @@ SECRET_KEY = config('DJANGO_SECRET_KEY')
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '0c32-31-223-89-89.ngrok-free.app',
+    'https://spotify-synchronization-d5ce8540b73a.herokuapp.com/',
     'localhost',
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://0c32-31-223-89-89.ngrok-free.app',
+    'https://spotify-synchronization-d5ce8540b73a.herokuapp.com/',
 ]
 
 
