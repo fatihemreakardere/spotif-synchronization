@@ -1,0 +1,6 @@
+build:
+  config:
+    DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+    DJANGO_DEBUG: false
+run:
+  web: gunicorn whisperss.wsgi:application
