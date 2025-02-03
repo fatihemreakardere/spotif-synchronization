@@ -1,6 +1,0 @@
-build:
-  config:
-    DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
-    DJANGO_DEBUG: false
-run:
-  web: gunicorn SpotifySynchronization.wsgi:application
