@@ -3,4 +3,4 @@ build:
     DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
     DJANGO_DEBUG: false
 run:
-  web: gunicorn whisperss.wsgi:application
+  web: gunicorn SpotifySynchronization.wsgi:application
