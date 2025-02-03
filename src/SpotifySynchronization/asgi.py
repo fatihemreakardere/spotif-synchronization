@@ -10,6 +10,10 @@ https://docs.djangoproject.com/en/5.1/howto/deployment/asgi/
 import os
 from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
+
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import music.routing
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "SpotifySynchronization.settings")
