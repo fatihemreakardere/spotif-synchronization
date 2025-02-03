@@ -31,6 +31,7 @@ ALLOWED_HOSTS = [
     'spotify-synchronization-d5ce8540b73a.herokuapp.com'
     'https://spotify-synchronization-d5ce8540b73a.herokuapp.com/',
     'localhost',
+    '127.0.0.1'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -154,4 +155,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 SPOTIFY_CLIENT_ID = config('SPOTIFY_CLIENT_ID')
 SPOTIFY_CLIENT_SECRET = config('SPOTIFY_CLIENT_SECRET')
-SPOTIFY_REDIRECT_URI = "https://0c32-31-223-89-89.ngrok-free.app/music/callback/"
+SPOTIFY_REDIRECT_URI = "http://localhost:8000/music/callback/"
