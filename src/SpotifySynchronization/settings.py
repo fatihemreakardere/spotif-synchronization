@@ -94,13 +94,28 @@ ASGI_APPLICATION = 'SpotifySynchronization.asgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
+ENV_SETTING = config('ENVIRONMENT_SETTING', default="DEV")
+HEROKU_DATABASE_URI = config('HEROKU_DATABASE_URI', default=None)
+CONN_MAX_AGE = config('CONN_MAX_AGE', default=600, cast=int)
+
+if ENV_SETTING == 'DEV':
+    DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
+elif ENV_SETTING == 'PRODUCTION':
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=HEROKU_DATABASE_URI,
+            conn_max_age=CONN_MAX_AGE,
+            conn_health_checks=True,
+            ssl_require=True,
+            ),
+    }
+        
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
