@@ -28,6 +28,7 @@ SECRET_KEY = config('DJANGO_SECRET_KEY')
 DEBUG = True
 
 ALLOWED_HOSTS = [
+    'spotify-synchronization-d5ce8540b73a.herokuapp.com'
     'https://spotify-synchronization-d5ce8540b73a.herokuapp.com/',
     'localhost',
 ]
