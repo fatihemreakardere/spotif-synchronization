@@ -1,5 +1,6 @@
 import asyncio
 import httpx
+import urllib.parse
 from channels.generic.websocket import AsyncWebsocketConsumer
 import json
 
@@ -8,27 +9,38 @@ class SpotifyPlayerConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
         query_string = self.scope.get("query_string", b"").decode("utf-8")
-        token_pair = [s for s in query_string.split("&") if s.startswith("token=")]
-        if token_pair:
-            self.access_token = token_pair[0].split("=")[1]
-        else:
-            self.access_token = None
-
-        if not self.access_token:
+        params = urllib.parse.parse_qs(query_string)
+        token_pair = params.get("token")
+        self.access_token = token_pair[0] if token_pair else None
+        
+        self.party = params.get("party", [None])[0]
+        if not self.access_token or not self.party:
             await self.close()
         else:
             await self.accept()
+            # Send self connection id to client
+            await self.send(text_data=json.dumps({"self_id": self.channel_name}))
+            # Add to party group:
+            self.group_name = "party_" + self.party
+            await self.channel_layer.group_add(self.group_name, self.channel_name)
             self.loop_task = asyncio.create_task(self.player_loop())
 
     async def disconnect(self, close_code):
         if hasattr(self, "loop_task"):
             self.loop_task.cancel()
+        if hasattr(self, "group_name"):
+            await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
     async def player_loop(self):
         while True:
             status = await self.get_player_status()
             if status:
-                await self.send(json.dumps(status))
+                # Include unique connection id so clients can update participant status:
+                status["connection_id"] = self.channel_name
+                await self.channel_layer.group_send(
+                    self.group_name,
+                    {"type": "participant_status", "status": status}
+                )
             await asyncio.sleep(0)
 
     async def get_player_status(self):
@@ -57,6 +69,9 @@ class SpotifyPlayerConsumer(AsyncWebsocketConsumer):
                 "album_art": album_art,
                 "curent_time_min_sec": f"{data.get('progress_ms') // 60000}:{str(data.get('progress_ms') % 60000 // 1000).zfill(2)}",
             }
+
+    async def participant_status(self, event):
+        await self.send(text_data=json.dumps(event["status"]))
 
     async def receive(self, text_data=None):
         # Handle control commands from client

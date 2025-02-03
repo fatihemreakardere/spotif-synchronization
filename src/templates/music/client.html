@@ -15,6 +15,12 @@
     <script>
       window.TOKEN = "{{ token }}";
     </script>
+    <!-- Hidden party code element for WebSocket connection -->
+    {% if party %}
+    <span id="party-code" style="display: none">{{ party.party_code }}</span>
+    {% else %}
+    <span id="party-code" style="display: none">default</span>
+    {% endif %}
     <div class="player">
       <h1>Now Playing</h1>
       <div class="track-info">
@@ -88,6 +94,8 @@
           {% endif %}
         </div>
         {% endif %}
+        <!-- New container for realtime participant statuses -->
+        <div id="participants"></div>
       </div>
     </div>
     <script src="{% static 'music/client.js' %}"></script>
