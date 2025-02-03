@@ -6,3 +6,4 @@ python-decouple
 channels
 httpx
 daphne
+channels_redis
