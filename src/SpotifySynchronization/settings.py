@@ -89,6 +89,16 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
+
 WSGI_APPLICATION = 'SpotifySynchronization.wsgi.application'
 ASGI_APPLICATION = 'SpotifySynchronization.asgi.application' 
 
