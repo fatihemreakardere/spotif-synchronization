@@ -41,7 +41,7 @@ class SpotifyPlayerConsumer(AsyncWebsocketConsumer):
                     self.group_name,
                     {"type": "participant_status", "status": status}
                 )
-            await asyncio.sleep(0)
+            await asyncio.sleep(2)
 
     async def get_player_status(self):
         headers = {"Authorization": "Bearer " + self.access_token}
