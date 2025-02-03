@@ -42,6 +42,53 @@
         <button id="play-btn" title="Play/Pause">&#9654;</button>
         <button id="next-btn" title="Next">&#9654;&#9654;</button>
       </div>
+
+      <!-- Party Controls Section -->
+      <div class="party-controls">
+        <button
+          id="start-party-btn"
+          onclick="location.href='{% url 'start_party' %}'"
+        >
+          Start Party
+        </button>
+        <form
+          action="{% url 'join_party' %}"
+          method="post"
+          style="display: inline"
+        >
+          {% csrf_token %}
+          <input
+            type="text"
+            name="party_code"
+            placeholder="Enter Party Code"
+            maxlength="6"
+          />
+          <button type="submit">Join Party</button>
+        </form>
+        {% if party %}
+        <div class="party-info">
+          <h2>Party: {{ party.party_code }}</h2>
+          <h3>Participants:</h3>
+          <ul>
+            {% for user in party.participants.all %}
+            <li>{{ user.username }}</li>
+            {% endfor %}
+          </ul>
+          <!-- If current user is host, show delete button; otherwise show quit button -->
+          {% if user == party.host %}
+          <form action="{% url 'delete_party' %}" method="post">
+            {% csrf_token %}
+            <button type="submit">Delete Party</button>
+          </form>
+          {% else %}
+          <form action="{% url 'quit_party' %}" method="post">
+            {% csrf_token %}
+            <button type="submit">Quit Party</button>
+          </form>
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
     </div>
     <script src="{% static 'music/client.js' %}"></script>
   </body>
