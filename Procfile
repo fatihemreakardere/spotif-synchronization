@@ -1,1 +1,1 @@
-web: gunicorn SpotifySynchronization.wsgi:application
+web: daphne SpotifySynchronization.asgi:application --port $PORT --bind 0.0.0.0 -v2
